@@ -3,7 +3,7 @@
 #include "redcode.h"
 
 #define CORE_COUNT 256
-#define DEBUG_MODE 0
+#define DEBUG_MODE 1
 
 struct cell {
   uint8_t owner;
@@ -34,7 +34,7 @@ struct core * core_initialize(struct core *c) {
   int x = 0;
   for (x=0; x<CORE_COUNT; x++) {
     c->cells[x].owner = 0;
-    c->cells[x].instruction = 0x5114;
+    c->cells[x].instruction = 0x01010101;
   }
   return c;
 }
@@ -48,9 +48,9 @@ void exec(struct core *c) {
 
     instr = parse_instruction(c->cells[pc].instruction);
 
-    printf("%d\r\n", instr[0]);
+//    printf("DEBUG LINE: %d %d %d %d\r\n", instr[0], instr[1], instr[2], instr[3]);
 
-    switch(c->cells[pc].instruction) {
+    switch(instr[0]) {
       case DAT:
         if (DEBUG_MODE)
           printf("(%d) NOOP\r\n", pc);
@@ -70,8 +70,13 @@ void exec(struct core *c) {
 
 uint8_t *parse_instruction(uint32_t instr) {
 
+  uint8_t *p = (uint8_t*)&instr;
   static uint8_t instructions[4];
-  instructions[0] = instr ^ 0x1110;
+  instructions[0] = *(p);
+  instructions[1] = *(p++);
+  instructions[2] = *(p++);
+  instructions[3] = *(p++);
+  instructions[4] = *(p++);
   return instructions;
 
 }
