@@ -1,3 +1,5 @@
+/* Instruction Set */
+
 #define DAT 0
 #define MOV 1
 #define ADD 2
@@ -18,3 +20,7 @@
 #define STP 17
 #define NOP 18
 
+/* Addressing modes */
+#define IMMEDIATE 0
+#define RELATIVE 1
+#define INDIRECT 2
