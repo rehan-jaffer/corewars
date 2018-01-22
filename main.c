@@ -34,7 +34,7 @@ struct core * core_initialize(struct core *c) {
   int x = 0;
   for (x=0; x<CORE_COUNT; x++) {
     c->cells[x].owner = 0;
-    c->cells[x].instruction = 0x01010101;
+    c->cells[x].instruction = 0x01000101;
   }
   return c;
 }
@@ -58,7 +58,8 @@ void exec(struct core *c) {
       break;
       case MOV:
         if (DEBUG_MODE)
-          printf("(%d) MOV r%d, r%d\r\n", pc, pc, pc);
+          printf("(%d) MOV r%d, r%d\r\n", pc, instr[1], instr[2]);
+        
       break;
     }
 
@@ -72,11 +73,16 @@ uint8_t *parse_instruction(uint32_t instr) {
 
   uint8_t *p = (uint8_t*)&instr;
   static uint8_t instructions[4];
-  instructions[0] = *(p);
-  instructions[1] = *(p++);
-  instructions[2] = *(p++);
-  instructions[3] = *(p++);
-  instructions[4] = *(p++);
+  instructions[0] = *p;
+  p++;
+  instructions[1] = *p;
+  p++;
+  instructions[2] = *p;
+  p++;
+  instructions[3] = *p;
+  p++;
+  instructions[4] = *p;
+  p++;
   return instructions;
 
 }
