@@ -24,3 +24,10 @@
 #define IMMEDIATE 0
 #define RELATIVE 1
 #define INDIRECT 2
+
+/* instruction elements */
+#define OP 0
+#define MODE1 1
+#define MODE2 2
+#define R0 3
+#define R1 4
