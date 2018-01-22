@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "redcode.h"
+#include "support.h"
 
 #define CORE_COUNT 256
 #define DEBUG_MODE 1
@@ -34,7 +35,7 @@ struct core * core_initialize(struct core *c) {
   int x = 0;
   for (x=0; x<CORE_COUNT; x++) {
     c->cells[x].owner = 0;
-    c->cells[x].instruction = 0x01000101;
+    c->cells[x].instruction = 0x31111110;
   }
   return c;
 }
@@ -59,11 +60,12 @@ void exec(struct core *c) {
       case MOV:
         if (DEBUG_MODE)
           printf("(%d) MOV r%d, r%d\r\n", pc, instr[1], instr[2]);
-        
+      break;
+      default:
+        printf("Error: unknown opcode %d", instr[0]);
+        exit(1);
       break;
     }
-
-    pc++;
 
   }
 
@@ -71,18 +73,30 @@ void exec(struct core *c) {
 
 uint8_t *parse_instruction(uint32_t instr) {
 
-  uint8_t *p = (uint8_t*)&instr;
+  /* 
+    according to the redcode spec
+    instruction - first 4 bits
+    addressing mode for first operand - next 2 bits
+    addressing mode for second operand - next 2 bits
+    first operand itself - next 2 bits
+    second operand itself - next 2 bits
+
+    the masks here are designed to extract out the bits specified
+  */
+
+  uint32_t instruction_mask = 0b11110000000000000000000000000000;
+  uint32_t addressing1_mask = 0b00001100000000000000000000000000;
+  uint32_t addressing2_mask = 0b00000011000000000000000000000000;
+  uint32_t operand1_mask =    0b00000000111111111111000000000000;
+  uint32_t operand2_mask =    0b00000000000000000000111111111111;
+
   static uint8_t instructions[4];
-  instructions[0] = *p;
-  p++;
-  instructions[1] = *p;
-  p++;
-  instructions[2] = *p;
-  p++;
-  instructions[3] = *p;
-  p++;
-  instructions[4] = *p;
-  p++;
+  instructions[0] = instr & instruction_mask >> 28;
+  instructions[1] = instr & addressing1_mask << 26;
+  instructions[2] = instr & addressing2_mask << 24;
+  instructions[3] = instr & operand1_mask << 12;
+  instructions[4] = instr & operand2_mask << 12;
+  printf("%d", instructions[0]);
   return instructions;
 
 }
