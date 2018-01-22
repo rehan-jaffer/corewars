@@ -34,7 +34,7 @@ struct core * core_initialize(struct core *c) {
   int x = 0;
   for (x=0; x<CORE_COUNT; x++) {
     c->cells[x].owner = 0;
-    c->cells[x].instruction = 0x31111110;
+    c->cells[x].instruction = 0x31111111;
   }
   return c;
 }
@@ -43,10 +43,43 @@ void exec(struct core *c) {
 
   int pc = 0;
   uint8_t *instr;
+  uint8_t *instr_p;
+  struct cell src_cell;
+  struct cell dest_cell;
+  uint8_t src;
+  uint8_t dest;
 
   while (pc < 256) {
 
     instr = parse_instruction(c->cells[pc].instruction);
+
+    switch (instr[MODE1]) {
+      case IMMEDIATE:
+        src = instr[R0];
+      break;
+      case RELATIVE:
+        src = pc + instr[R0];
+      break;
+      case INDIRECT:
+        src_cell = c->cells[pc + instr[R0]];
+        instr_p = parse_instruction(src_cell.instruction);
+        src = instr_p[R1];
+      break;
+    }
+
+   switch(instr[MODE2]) {
+      case IMMEDIATE:
+        dest = instr[R0];
+      break;
+      case RELATIVE:
+        dest = pc + instr[R0];
+      break;
+      case INDIRECT:
+        dest_cell = c->cells[pc + instr[R0]];
+        instr_p = parse_instruction(dest_cell.instruction);
+        dest = instr_p[R1];
+      break;     
+   }
 
 //    printf("DEBUG LINE: %d %d %d %d\r\n", instr[0], instr[1], instr[2], instr[3]);
 
@@ -58,7 +91,9 @@ void exec(struct core *c) {
       break;
       case MOV:
         if (DEBUG_MODE)
-          printf("(%d) MOV r%d, r%d\r\n", pc, instr[1], instr[2]);
+          printf("(%d) MOV %d, %d\r\n", pc, src, dest);
+        c->cells[src] = c->cells[dest];
+        pc++;
       break;
       default:
         printf("Error: unknown opcode %d", instr[0]);
@@ -89,7 +124,7 @@ uint8_t *parse_instruction(uint32_t instr) {
   uint32_t operand1_mask =    0b00000000111111111111000000000000;
   uint32_t operand2_mask =    0b00000000000000000000111111111111;
 
-  static uint8_t instructions[4];
+  static uint8_t instructions[5];
   instructions[0] = instr & instruction_mask >> 28;
   instructions[1] = instr & addressing1_mask << 26;
   instructions[2] = instr & addressing2_mask << 24;
