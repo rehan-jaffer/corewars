@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "redcode.h"
-#include "support.h"
 
 #define CORE_COUNT 256
 #define DEBUG_MODE 1
