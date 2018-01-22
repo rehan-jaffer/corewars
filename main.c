@@ -126,10 +126,10 @@ uint8_t *parse_instruction(uint32_t instr) {
 
   static uint8_t instructions[5];
   instructions[0] = instr & instruction_mask >> 28;
-  instructions[1] = instr & addressing1_mask << 26;
-  instructions[2] = instr & addressing2_mask << 24;
-  instructions[3] = instr & operand1_mask << 12;
-  instructions[4] = instr & operand2_mask << 12;
+  instructions[1] = instr & addressing1_mask >> 26;
+  instructions[2] = instr & addressing2_mask >> 24;
+  instructions[3] = instr & operand1_mask >> 12;
+  instructions[4] = instr & operand2_mask >> 12;
   printf("%d", instructions[0]);
   return instructions;
 
